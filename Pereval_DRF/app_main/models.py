@@ -13,6 +13,9 @@ class Users(models.Model):
     firstname = models.CharField(max_length=255, verbose_name="Имя")
     lastname = models.CharField(max_length=255, verbose_name="Фамилия")
 
+    class Meta:
+        verbose_name_plural = ("Пользователи")
+
 class Coords(models.Model):
     """
     Класс модели для координат перевала.
@@ -25,6 +28,12 @@ class Coords(models.Model):
     longitude = models.FloatField(max_length=254, verbose_name="Долгота")
     height = models.IntegerField(verbose_name="Высота")
 
+    def __str__(self):
+        return f'{self.latitude} {self.longitude} {self.height}'
+
+    class Meta:
+        verbose_name_plural = ("Координаты")
+
 
 class PerevalAdd(models.Model):
     """Класс модели для перевала."""
@@ -35,7 +44,7 @@ class PerevalAdd(models.Model):
                       (REJECTED, 'rejected')]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=NEW)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    coords = models.OneToOneField(Coords, on_delete=models.CASCADE)
+    coords_id = models.OneToOneField(Coords, on_delete=models.CASCADE)
     beautyTitle = models.CharField(max_length=254)
     title = models.CharField(max_length=254)
     other_titles = models.CharField(max_length=254)
@@ -47,7 +56,7 @@ class Level(models.Model):
     """
     Класс модели для категорий трудности. (В разное время года перевал может иметь разную категорию).
     Поля модели:
-    pereval_id - идентификатор перевала (связан с моделью PerevalAdd);
+    pereval - перевал (связан с моделью PerevalAdd);
     level_spring - уровень сложности перевала весной;
     level_summer - уровень сложности перевала летом;
     level_autumn - уровень сложности перевала осенью;
@@ -59,17 +68,25 @@ class Level(models.Model):
     level_autumn = models.CharField(max_length=254, blank=True)
     level_winter = models.CharField(max_length=254, blank=True)
 
-
+    class Meta:
+        verbose_name_plural = ("Категории сложности")
 
 class Images(models.Model):
     """
     Класс модели для загружаемых картинок(фотографий перевалов):
     Поля модели:
-    pereval_id - идентификатор перевала (связан с моделью PerevalAdd);
-    img - картинка (в виде необработанных двоичных данных);
-    date_added - время добавления картинки.
+    pereval - перевал, который сфотографировали (связан с моделью PerevalAdd);
+    image - фото перевала (в виде необработанных двоичных данных);
+    date_added - время добавления фото.
     """
-    pereval = models.ForeignKey(PerevalAdd, on_delete=models.CASCADE)
+    title = models.CharField(max_length=254)
     image = models.BinaryField()
     date_added = models.DateField(auto_now_add=True)
+    pereval = models.ForeignKey(PerevalAdd, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.pereval}: {self.title}'
+
+    class Meta:
+        verbose_name_plural = ("Фотографии")
 
