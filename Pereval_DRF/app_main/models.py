@@ -10,6 +10,8 @@ class Users(models.Model):
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
+    firstname = models.CharField(max_length=255, verbose_name="Имя")
+    lastname = models.CharField(max_length=255, verbose_name="Фамилия")
 
 class Coords(models.Model):
     """
@@ -19,9 +21,9 @@ class Coords(models.Model):
     longitude - географическая долгота;
     height - высота над уровнем моря
     """
-    latitude = models.FloatField(max_length=254)
-    longitude = models.FloatField(max_length=254)
-    height = models.IntegerField()
+    latitude = models.FloatField(max_length=254, verbose_name="Широта")
+    longitude = models.FloatField(max_length=254, verbose_name="Долгота")
+    height = models.IntegerField(verbose_name="Высота")
 
 
 class PerevalAdd(models.Model):
@@ -33,7 +35,7 @@ class PerevalAdd(models.Model):
                       (REJECTED, 'rejected')]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=NEW)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    coords_id = models.OneToOneField(Coords, on_delete=models.CASCADE)
+    coords = models.OneToOneField(Coords, on_delete=models.CASCADE)
     beautyTitle = models.CharField(max_length=254)
     title = models.CharField(max_length=254)
     other_titles = models.CharField(max_length=254)
@@ -51,7 +53,7 @@ class Level(models.Model):
     level_autumn - уровень сложности перевала осенью;
     level_winter - уровень сложности перевала зимой;
     """
-    pereval_id = models.ForeignKey(PerevalAdd, on_delete=models.CASCADE)
+    pereval = models.ForeignKey(PerevalAdd, on_delete=models.CASCADE)
     level_spring = models.CharField(max_length=254, blank=True)
     level_summer = models.CharField(max_length=254, blank=True)
     level_autumn = models.CharField(max_length=254, blank=True)
@@ -67,7 +69,7 @@ class Images(models.Model):
     img - картинка (в виде необработанных двоичных данных);
     date_added - время добавления картинки.
     """
-    pereval_id = models.ForeignKey(PerevalAdd, on_delete=models.CASCADE)
+    pereval = models.ForeignKey(PerevalAdd, on_delete=models.CASCADE)
     image = models.BinaryField()
     date_added = models.DateField(auto_now_add=True)
 
