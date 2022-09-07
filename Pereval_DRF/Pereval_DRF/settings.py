@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # подключаем созданное приложение app_main
     'app_main',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
