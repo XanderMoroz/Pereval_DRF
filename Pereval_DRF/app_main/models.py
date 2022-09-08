@@ -1,20 +1,18 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.db import models
 
-class Users(models.Model):
+class PerevalUser(models.Model):
     """
-    Класс модели для пользователей (туристов на перевале со смартфоном)
-    Поля модели:
-    user - идентификатор пользователя (связан со встроенной моделью User);
-    email - уникальный адрес электронной почты.
+    Класс модели для пользователей. Поля модели:
+    email - уникальный адрес электронной почты;
+    otc - отчество;
+    phone - номер телефона.
     """
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email = models.EmailField(unique=True)
-    firstname = models.CharField(max_length=255, verbose_name="Имя")
-    lastname = models.CharField(max_length=255, verbose_name="Фамилия")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    #email = models.EmailField(unique=True, verbose_name="Эл.почта")
+    otc = models.CharField(max_length=255, verbose_name="Отчество")
+    phone = models.CharField(max_length=64, verbose_name="Номер телефона")
 
-    class Meta:
-        verbose_name_plural = ("Пользователи")
 
 class Coords(models.Model):
     """
@@ -29,7 +27,7 @@ class Coords(models.Model):
     height = models.IntegerField(verbose_name="Высота")
 
     def __str__(self):
-        return f'{self.latitude} {self.longitude} {self.height}'
+        return f'Широта - {self.latitude}. Долгота - {self.longitude}. Высота - {self.height} метров.'
 
     class Meta:
         verbose_name_plural = ("Координаты")
@@ -38,54 +36,43 @@ class Coords(models.Model):
 class PerevalAdd(models.Model):
     """Класс модели для перевала."""
     NEW, PENDING, ACCEPTED, REJECTED = 'N', 'P', 'A', 'R'
-    STATUS_CHOICES = [(NEW, 'new'),
-                      (PENDING, 'pending',),
-                      (ACCEPTED, 'accepted',),
-                      (REJECTED, 'rejected')]
+    STATUS_CHOICES = [(NEW, 'Новый'), (PENDING, 'Модерируется',), (ACCEPTED, 'Принят',), (REJECTED, 'Отклонен')]
+
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=NEW)
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    coords_id = models.OneToOneField(Coords, on_delete=models.CASCADE)
-    beautyTitle = models.CharField(max_length=254)
+    beauty_title = models.CharField(max_length=254)
     title = models.CharField(max_length=254)
     other_titles = models.CharField(max_length=254)
     connect = models.TextField(blank=True)
-    add_time = models.DateTimeField(auto_now_add=True)
+    add_time = models.DateTimeField(auto_now_add=True, verbose_name="Время добавления")
 
+    user = models.ForeignKey(PerevalUser, on_delete=models.CASCADE, related_name='pereval')
+    coords = models.OneToOneField(Coords, on_delete=models.CASCADE)
+    # Категории сложностей
+    level_spring = models.CharField(max_length=254, blank=True, verbose_name="Сложность весной")
+    level_summer = models.CharField(max_length=254, blank=True, verbose_name="Сложность летом")
+    level_autumn = models.CharField(max_length=254, blank=True, verbose_name="Сложность осенью")
+    level_winter = models.CharField(max_length=254, blank=True, verbose_name="Сложность зимой")
 
-class Level(models.Model):
-    """
-    Класс модели для категорий трудности. (В разное время года перевал может иметь разную категорию).
-    Поля модели:
-    pereval - перевал (связан с моделью PerevalAdd);
-    level_spring - уровень сложности перевала весной;
-    level_summer - уровень сложности перевала летом;
-    level_autumn - уровень сложности перевала осенью;
-    level_winter - уровень сложности перевала зимой;
-    """
-    pereval = models.ForeignKey(PerevalAdd, on_delete=models.CASCADE)
-    level_spring = models.CharField(max_length=254, blank=True)
-    level_summer = models.CharField(max_length=254, blank=True)
-    level_autumn = models.CharField(max_length=254, blank=True)
-    level_winter = models.CharField(max_length=254, blank=True)
-
-    class Meta:
-        verbose_name_plural = ("Категории сложности")
+    def __str__(self):
+        return f"id: {self.pk}, title:{self.title}"
 
 class Images(models.Model):
     """
     Класс модели для загружаемых картинок(фотографий перевалов):
     Поля модели:
-    pereval - перевал, который сфотографировали (связан с моделью PerevalAdd);
+    title - Название фотографии;
     image - фото перевала (в виде необработанных двоичных данных);
     date_added - время добавления фото.
+    pereval - перевал, который сфотографировали (связан с моделью PerevalAdd);
     """
-    title = models.CharField(max_length=254)
-    image = models.BinaryField()
-    date_added = models.DateField(auto_now_add=True)
+    title = models.CharField(max_length=254, verbose_name="Название")
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/')
+    date_added = models.DateField(auto_now_add=True, verbose_name="Время добавления")
+
     pereval = models.ForeignKey(PerevalAdd, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.pereval}: {self.title}'
+        return f"id: {self.pk}, title:{self.title}"
 
     class Meta:
         verbose_name_plural = ("Фотографии")
