@@ -7,3 +7,5 @@ class PerevalAddSerializer(serializers.ModelSerializer):
     """Сериализатор перевалов"""
     class Meta:
         model = PerevalAdd
+        exclude = ("status",)  # все поля кроме статуса
+
