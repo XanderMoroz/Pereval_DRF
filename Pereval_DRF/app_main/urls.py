@@ -2,5 +2,5 @@ from django.urls import path, include
 from .views import *
 
 urlpatterns = [
-    path('', PerevalListView.as_view()),
+    path('submitData', PerevalAPIView.as_view()),
 ]
