@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 class CoordsSerializer(serializers.ModelSerializer):
     """Сериализатор координат перевала"""
     class Meta:
-       model = PerevalUser
+       model = Coords
        fields = ['latitude', 'longitude', 'height']
 
 
@@ -19,6 +19,7 @@ class PerevalAddSerializer(serializers.ModelSerializer):
     """Сериализатор перевалов"""
     user = serializers.PrimaryKeyRelatedField(queryset=PerevalUser.objects.all())
     coords = serializers.PrimaryKeyRelatedField(queryset=Coords.objects.all())
+
     class Meta:
         model = PerevalAdd
         depth = 1
@@ -34,3 +35,14 @@ class PerevalAddSerializer(serializers.ModelSerializer):
                   "level_autumn",
                   "level_spring",
                   )
+
+class PerevalDetailSerializer(serializers.ModelSerializer):
+    """Сериализатор перевала(детальный)"""
+    user = UserSerializer()
+    coords = CoordsSerializer()
+    #images = ImagesSerializer(many=True)
+
+    class Meta:
+        model = PerevalAdd
+        depth = 1
+        fields = '__all__'
