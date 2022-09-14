@@ -9,9 +9,14 @@ class PerevalUser(models.Model):
     phone - номер телефона.
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    #email = models.EmailField(unique=True, verbose_name="Эл.почта")
+    fam = models.CharField(max_length=254, default=None, verbose_name="Фамилия")
+    name = models.CharField(max_length=254, default=None,  verbose_name="Имя")
+    email = models.EmailField(unique=True, default=None, verbose_name="Эл.почта")
     otc = models.CharField(max_length=255, verbose_name="Отчество")
     phone = models.CharField(max_length=64, verbose_name="Номер телефона")
+
+    def __str__(self):
+        return f'{self.fam} {self.name} {self.otc}'
 
 
 class Coords(models.Model):
