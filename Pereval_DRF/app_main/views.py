@@ -1,24 +1,31 @@
+from rest_framework import viewsets
 from rest_framework.response import Response
-
+from django.http import JsonResponse
+from rest_framework import generics
 from .models import *
-from rest_framework.views import APIView
-
-from .serializers import PerevalAddSerializer
+from .serializers import PerevalAddSerializer, CoordsSerializer
 
 
-class PerevalListView(APIView):
-   """Список всех перевалов"""
+class PerevalAPIView(generics.CreateAPIView):
+    queryset = PerevalAdd.objects.all()
+    serializer_class = PerevalAddSerializer
 
-   def get(self, request):
-      perevals = PerevalAdd.objects.all()
-      serializer = PerevalAddSerializer(perevals, many=True)
-      return Response(serializer.data)
-
-   def post(self, request):
-      pereval = PerevalAddSerializer(data=request.data)
-      if pereval.is_valid():
-         pereval.save()
-         return Response(status=201)
-      else:
-         print("Ошибка валидизации данных")
-         return Response(status=400)
+    def post(self, request):
+        """POST запрос для добавления модели"""
+        pereval = PerevalAddSerializer(data=request.data)
+        try:
+            if pereval.is_valid(raise_exception=True):
+                pereval.save()
+                data = {
+                    'status': '200',
+                    'message': 'null',
+                    'id': f'{pereval.instance.id}'
+                }
+                return JsonResponse(data, status=200, safe=False)
+        except Exception as exc:
+            data = {
+                'status': '400',
+                'message': f'Bad Request: {exc}',
+                'id': 'null'
+            }
+        return JsonResponse(data, status=400, safe=False)
