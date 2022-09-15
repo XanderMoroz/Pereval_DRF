@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from django.http import JsonResponse
-from rest_framework import generics
+from rest_framework import generics, viewsets, mixins
 from .models import *
 from .serializers import PerevalAddSerializer, PerevalDetailSerializer
 
@@ -21,42 +21,35 @@ class PerevalAPIView(generics.CreateAPIView):
         try:
             if pereval.is_valid(raise_exception=True):
                 pereval.save()
-                data = {
-                    'status': '200',
-                    'message': 'null',
-                    'id': f'{pereval.instance.id}'
-                }
+                data = {'status': '200', 'message': 'null', 'id': f'{pereval.instance.id}'}
                 return JsonResponse(data, status=200, safe=False)
+
         except Exception as exc:
-            data = {
-                'status': '400',
-                'message': f'Bad Request: {exc}',
-                'id': 'null'
-            }
-        return JsonResponse(data, status=400, safe=False)
+            responseData = {'status': '400', 'message': f'Bad Request: {exc}', 'id': 'null'}
+            return JsonResponse(responseData, status=400, safe=False)
 
-class PerevalDetail(generics.UpdateAPIView):
-    """Класс работы с БД для второго спринта"""
-    serializer_class = PerevalAddSerializer
 
-    def get_object(self, pk):
-        return PerevalAdd.objects.get(pk=pk)
+class PerevalDetail(mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
 
-    def get(self, *args, **kwargs):
-        """
-        Переопределение метода GET для вывода записи по id
-        :param request: Json для полей модели перевала (PerevalAdd)
-        :return: JsonResponse пример: {"state": "0", "message": "PerevalAdd matching query does not exist."}
-        """
-        pk = kwargs.get('pk', None)
+    queryset = PerevalAdd.objects.all()
+    serializer_class = PerevalDetailSerializer
+
+    def update(self, request, *args, **kwargs):
+        pk = kwargs.get("pk", None)
+
         try:
-            data = PerevalDetailSerializer(PerevalAdd.objects.get(pk=pk)).data
-            responseData = {'state': '1', 'message': f'{data}'}
-            return JsonResponse(responseData)
-        except Exception as exc:
-            responseData = {'state': '0', 'message': f'{exc}'}
-            return JsonResponse(responseData)
+            instance = PerevalAdd.objects.get(pk=pk)
+        except:
+            return Response({"error": "Такого перевала не существует"}, status=400)
 
-
-
-
+        if instance.status != "N":
+            return Response({"message": "Перевал на модерации, вы не можете его изменить",
+                             "state": 0}, status=400)
+        else:
+            # для метода upd обязательно нужно передать instance, иначе сериализатор будет воспринимать это как create
+            serializer = PerevalDetailSerializer(data=request.data, instance=instance)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({"state": 1}, status=200)
