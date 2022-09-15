@@ -2,11 +2,9 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework import generics, viewsets, mixins
-from .models import *
-from .serializers import PerevalAddSerializer, PerevalDetailSerializer
+from .serializers import *
 
-
-class PerevalAPIView(generics.CreateAPIView):
+class PerevalAddAPI(generics.CreateAPIView):
     """Класс работы с БД для первого спринта"""
     queryset = PerevalAdd.objects.all()
     serializer_class = PerevalAddSerializer
@@ -29,14 +27,17 @@ class PerevalAPIView(generics.CreateAPIView):
             return JsonResponse(responseData, status=400, safe=False)
 
 
-class PerevalDetail(mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    viewsets.GenericViewSet):
-
+class PerevalDetailAPI(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    """Класс работы с БД для второго спринта: извлечение и редактирование перевала"""
     queryset = PerevalAdd.objects.all()
     serializer_class = PerevalDetailSerializer
 
     def update(self, request, *args, **kwargs):
+        """
+        Переопределение метода update(PATCH)
+        :param request: Json для полей модели перевала (PerevalAdd)
+        :return: Response пример: { "message": "Перевал на модерации, вы не можете его изменить" }
+        """
         pk = kwargs.get("pk", None)
 
         try:
@@ -48,8 +49,28 @@ class PerevalDetail(mixins.RetrieveModelMixin,
             return Response({"message": "Перевал на модерации, вы не можете его изменить",
                              "state": 0}, status=400)
         else:
-            # для метода upd обязательно нужно передать instance, иначе сериализатор будет воспринимать это как create
             serializer = PerevalDetailSerializer(data=request.data, instance=instance)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({"state": 1}, status=200)
+
+
+class AuthEmailPerevalAPI(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Класс работы с БД для второго спринта: вывод всех записей по email"""
+    queryset = PerevalAdd.objects.all()
+    serializer_class = AuthEmailPerevalSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        Переопределение метода GET для вывода всех записей по email
+        :param request: Json для полей модели перевала (PerevalAdd)
+        :return: Response пример: { "status": 200, "message": null, "id": 42 }
+        """
+        email = kwargs.get('email', None)
+        if PerevalAdd.objects.filter(user__email=email).is_exist == True:
+            responseData = AuthEmailPerevalSerializer(PerevalAdd.objects.filter(user__email=email), many=True).data
+
+        else:
+            responseData = {'message': f'Нет записей от email = {email}'}
+
+        return Response(responseData, status=200)
