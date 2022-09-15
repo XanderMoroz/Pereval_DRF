@@ -38,14 +38,24 @@ class PerevalAddSerializer(serializers.ModelSerializer):
 
 class PerevalDetailSerializer(serializers.ModelSerializer):
     """Сериализатор перевала(детальный)"""
-    #user = serializers.PrimaryKeyRelatedField(queryset=PerevalUser.objects.all())
-    #coords = serializers.PrimaryKeyRelatedField(queryset=Coords.objects.all())
-
-    #user = UserSerializer()
-    #coords = CoordsSerializer()
-    #images = ImagesSerializer(many=True)
 
     class Meta:
         model = PerevalAdd
         depth = 1
         fields = '__all__'
+
+class AuthEmailPerevalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PerevalAdd
+        depth = 1
+        fields = ("beauty_title",
+                  "title",
+                  "other_titles",
+                  "connect",
+                  "add_time",
+                  "coords",
+                  "level_winter",
+                  "level_summer",
+                  "level_autumn",
+                  "level_spring",
+                  )
