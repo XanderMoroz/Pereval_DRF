@@ -38,8 +38,11 @@ class PerevalAddSerializer(serializers.ModelSerializer):
 
 class PerevalDetailSerializer(serializers.ModelSerializer):
     """Сериализатор перевала(детальный)"""
-    user = UserSerializer()
-    coords = CoordsSerializer()
+    #user = serializers.PrimaryKeyRelatedField(queryset=PerevalUser.objects.all())
+    #coords = serializers.PrimaryKeyRelatedField(queryset=Coords.objects.all())
+
+    #user = UserSerializer()
+    #coords = CoordsSerializer()
     #images = ImagesSerializer(many=True)
 
     class Meta:
