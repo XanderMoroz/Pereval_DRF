@@ -1,3 +1,8 @@
+# Pereval-API
+
+API мобильного приложения Федерации Спортивного Туризма России (ФСТР) с помощью Django Rest Framework.
+Version: 0.1.0
+
 ## Documentation for API Endpoints
 
 All URIs are relative to */*
