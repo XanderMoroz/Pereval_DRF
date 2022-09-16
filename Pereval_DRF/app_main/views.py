@@ -12,8 +12,6 @@ class PerevalAddAPI(generics.CreateAPIView):
     def post(self, request):
         """
         Переопределение метода POST
-        :param request: Json для полей модели перевала (PerevalAdd)
-        :return: JsonResponse пример: { "status": 200, "message": null, "id": 42 }
         """
         pereval = PerevalAddSerializer(data=request.data)
         try:
@@ -35,8 +33,6 @@ class PerevalDetailAPI(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, views
     def update(self, request, *args, **kwargs):
         """
         Переопределение метода update(PATCH)
-        :param request: Json для полей модели перевала (PerevalAdd)
-        :return: Response пример: { "message": "Перевал на модерации, вы не можете его изменить" }
         """
         pk = kwargs.get("pk", None)
 
