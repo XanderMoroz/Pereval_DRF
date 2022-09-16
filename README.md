@@ -3,6 +3,8 @@
 API мобильного приложения Федерации Спортивного Туризма России (ФСТР) с помощью Django Rest Framework.
 Version: 0.1.0
 
+подробнее https://app.swaggerhub.com/apis/MOROZ070688/Pereval_API/0.0.0
+
 ## Documentation for API Endpoints
 
 All URIs are relative to */*
